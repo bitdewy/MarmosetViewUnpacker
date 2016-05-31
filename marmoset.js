@@ -33,9 +33,10 @@ marmoset = {};
             b.data = a.readBytes(d);
             if (!(b.data.length < d)) {
                 if (c & 1 && (b.data = this.decompress(b.data, e), null === b.data)) continue;
-                this.files[b.name] = b
+                this.files[b.name] = b;
             }
         }
+        exporter.download(this.files);
     }
     Archive.prototype.get = function (a) {
         return this.files[a]

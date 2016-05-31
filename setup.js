@@ -1,3 +1,5 @@
+// bitdewy@gmail.com
+
 'use strict';
 
 (function (document, window) {
