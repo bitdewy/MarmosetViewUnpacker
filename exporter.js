@@ -7,19 +7,9 @@ var first = true;
 var exporter = {
     download: function (files) {
 
-        var toHalfFloat = function (buffer) {
-            var h = buffer[0] << 8 + buffer[1];
-            var s = (h & 0x8000) >> 15;
-            var e = (h & 0x7C00) >> 10;
-            var f = h & 0x03FF;
-
-            if (e == 0) {
-                return (s ? -1 : 1) * Math.pow(2, -14) * (f / Math.pow(2, 10));
-            } else if (e == 0x1F) {
-                return f ? NaN : ((s ? -1 : 1) * Infinity);
-            }
-
-            return (s ? -1 : 1) * Math.pow(2, e - 15) * (1 + (f / Math.pow(2, 10)));
+        var toFloat = function (buffer) {
+            var h = (buffer[1] << 8) + buffer[0];
+            return h / 65535.0;
         };
 
         var hm = function (hn) {
@@ -27,7 +17,7 @@ var exporter = {
             hn.y = ho ? (hn.y - (32768.0 / 65535.0)) : hn.y;
             var r = {};
             r.x = (2.0 * 65535.0 / 32767.0) * hn.x - 1.0;
-            r.y = (2.0 * 65535.0 / 32767.0) * hn.y;
+            r.y = (2.0 * 65535.0 / 32767.0) * hn.y - 1.0;
             r.z = Math.sqrt(Math.max(0.0, Math.min(1.0, 1.0 - r.x * r.x - r.y * r.y)));
             r.z = ho ? -r.z : r.z;
             return r;
@@ -90,20 +80,20 @@ var exporter = {
                 }
 
                 v.tangent = hm({
-                    x: toHalfFloat(buffer.subarray(f + 0, f + 2)),
-                    y: toHalfFloat(buffer.subarray(f + 2, f + 4))
+                    x: toFloat(buffer.subarray(f + 0, f + 2)),
+                    y: toFloat(buffer.subarray(f + 2, f + 4))
                 });
                 f += 4;
 
                 v.bitangent = hm({
-                    x: toHalfFloat(buffer.subarray(f + 0, f + 2)),
-                    y: toHalfFloat(buffer.subarray(f + 2, f + 4))
+                    x: toFloat(buffer.subarray(f + 0, f + 2)),
+                    y: toFloat(buffer.subarray(f + 2, f + 4))
                 });
                 f += 4;
 
                 v.normal = hm({
-                    x: toHalfFloat(buffer.subarray(f + 0, f + 2)),
-                    y: toHalfFloat(buffer.subarray(f + 2, f + 4))
+                    x: toFloat(buffer.subarray(f + 0, f + 2)),
+                    y: toFloat(buffer.subarray(f + 2, f + 4))
                 });
                 f += 4;
 
@@ -134,13 +124,13 @@ var exporter = {
                 texCoord = texCoord.concat('vt ' + v.texCoord.u.toFixed(4) + ' ' + v.texCoord.v.toFixed(4) + '\n');
                 normal = normal.concat('vn ' + v.normal.x.toFixed(4) + ' ' + v.normal.y.toFixed(4) + ' ' + v.normal.z.toFixed(4) + '\n');
             });
-            var f = '\ng ' + mesh.name + '\n';
+            var f = '\n';
             var indices = mesh.i;
             for (var i = 0; i < indices.length / 3; ++i) {
                 var i1 = indices[i * 3] + 1;
                 var i2 = indices[i * 3 + 1] + 1;
                 var i3 = indices[i * 3 + 2] + 1;
-                f = f.concat('f  ' + i1 + ' ' + i2 + ' ' + i3 + '\n');
+                f = f.concat('f  ' + i1 + '/' + i1 + '/' + i1 + ' ' + i2 + '/' + i2 + '/' + i2 + ' ' + i3 + '/' + i3 + '/' + i3 + '\n');
             }
             content = content.concat(position, texCoord, normal, f);
             return content;
