@@ -1196,8 +1196,7 @@ marmoset = {};
         this.indexCount = b.indexCount;
         this.indexTypeSize = b.indexTypeSize;
         this.indexType = 4 == this.indexTypeSize ? a.UNSIGNED_INT : a.UNSIGNED_SHORT;
-        this.indexBuffer =
-            a.createBuffer();
+        this.indexBuffer = a.createBuffer();
         a.bindBuffer(a.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         var d = c.readBytes(this.indexCount * this.indexTypeSize);
         a.bufferData(a.ELEMENT_ARRAY_BUFFER, d, a.STATIC_DRAW);
