@@ -1,3 +1,4 @@
 *.mview
 *~
 node_modules
+public/image/
