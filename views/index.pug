@@ -3,12 +3,69 @@ html(lang="en")
 	head
 		meta(charset="utf-8")
 		meta(name="author" content="bitdewy@gmail.com")
-		title Marmoset Viewer
+		link(rel="stylesheet" href="css/bootstrap.css" media="screen")
+		title Marmoset Scene Unpack
 	body
+	.navbar.navbar-default.navbar-fixed-top
+		.container
+			.navbar-header
+				a.navbar-brand.
+					Marmoset Scene Unpack
+	.container
+		.page-header
+			.row
+				.col-lg-8.col-md-7.col-sm-6
+					h1 Marmoset Scene Unpack
+		.bs-docs-section
+			.row
+				.col-lg-4
+					.panel.panel-primary
+						.panel-heading
+							h3.panel-title Sword
+						.panel-body
+							a(href='#')
+								img.img-thumbnail(src='image/thumbnail.jpg', data='mview/sword.mview')
+						.panel-footer
+							a.btn.btn-success.btn-block(data='mview/sword.mview') download resource
+				.col-lg-4
+					.panel.panel-primary
+						.panel-heading
+							h3.panel-title Sword
+						.panel-body
+							a(href='#')
+								img.img-thumbnail(src='image/thumbnail.jpg', data='mview/sword.mview')
+						.panel-footer
+							a.btn.btn-success.btn-block(data='mview/sword.mview') download resource
+				.col-lg-4
+					.panel.panel-primary
+						.panel-heading
+							h3.panel-title Sword
+						.panel-body
+							a(href='#')
+								img.img-thumbnail(src='image/thumbnail.jpg', data='mview/sword.mview')
+						.panel-footer
+							a.btn.btn-success.btn-block(data='mview/sword.mview') download resource
+		.bs-docs-section
+			#source-modal.modal.fade
+				.modal-dialog.modal-lg
+					.modal-content
+						.modal-header
+							button.close(type='button', data-dismiss='modal' aria-hidden='true') x
+							h4.modal-title preview
+						.modal-body
+		footer
+			.row
+				.col-lg-12
+					ul.list-unstyled
+						li.pull-right
+							a(href='#top') Back to top
+					p Based on 
+						a(href='http://getbootstrap.com', rel='nofollow') Bootstrap
+	script(src="js/jquery-1.10.2.js")
+	script(src="js/bootstrap.js")
 	script(src="js/binary-parser.js")
 	script(src="js/exporter.js")
 	script(src="js/FileSaver.js")
 	script(src="js/jszip.js")
 	script(src="js/marmoset.js")
 	script(src="js/setup.js")
-

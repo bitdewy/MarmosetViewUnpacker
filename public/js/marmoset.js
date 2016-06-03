@@ -36,7 +36,6 @@ marmoset = {};
                 this.files[b.name] = b;
             }
         }
-        exporter.download(this.files);
     }
     Archive.prototype.get = function (a) {
         return this.files[a]
@@ -3218,6 +3217,8 @@ marmoset = {};
             this.canvas.height, this.stripData.active()))
     };
     marmoset = "undefined" == typeof marmoset ? {} : marmoset;
+    marmoset.Archive = Archive;
+    marmoset.Network = Network;
     marmoset.WebViewer = WebViewer;
     marmoset.dataLocale = "data/";
 })(marmoset);

@@ -11,6 +11,5 @@ gulp.task('default', function() {
 });
 
 gulp.task('test', function() {
-	
-});
 
+});
