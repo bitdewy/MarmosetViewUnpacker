@@ -17,34 +17,18 @@ html(lang="en")
 				.col-lg-8.col-md-7.col-sm-6
 					h1 Marmoset Scene Unpack
 		.bs-docs-section
-			.row
+			each val, index in content
+				if (index % 3 == 0)
+					.row
 				.col-lg-4
 					.panel.panel-primary
 						.panel-heading
-							h3.panel-title Sword
+							h3.panel-title= val.name
 						.panel-body
 							a(href='#')
-								img.img-thumbnail(src='image/thumbnail.jpg', data='mview/sword.mview')
+								img.img-thumbnail(src=val.img, data=val.scene)
 						.panel-footer
-							a.btn.btn-success.btn-block(data='mview/sword.mview') download resource
-				.col-lg-4
-					.panel.panel-primary
-						.panel-heading
-							h3.panel-title Sword
-						.panel-body
-							a(href='#')
-								img.img-thumbnail(src='image/thumbnail.jpg', data='mview/sword.mview')
-						.panel-footer
-							a.btn.btn-success.btn-block(data='mview/sword.mview') download resource
-				.col-lg-4
-					.panel.panel-primary
-						.panel-heading
-							h3.panel-title Sword
-						.panel-body
-							a(href='#')
-								img.img-thumbnail(src='image/thumbnail.jpg', data='mview/sword.mview')
-						.panel-footer
-							a.btn.btn-success.btn-block(data='mview/sword.mview') download resource
+							a.btn.btn-success.btn-block(data=val.scene) download resource
 		.bs-docs-section
 			#source-modal.modal.fade
 				.modal-dialog.modal-lg
