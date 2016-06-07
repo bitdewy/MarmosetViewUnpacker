@@ -113,6 +113,22 @@ var exporter = {
             };
         };
 
+        var generateTangent = function (mesh) {
+            var content = '';
+            mesh.v.forEach(function (v, i) {
+                content = content.concat(v.tangent.x.toFixed(4) + ' ' + v.tangent.y.toFixed(4) + ' ' + v.tangent.z.toFixed(4) + '\n');
+            });
+            return content;
+        };
+
+        var generateBiangent = function (mesh) {
+            var content = '';
+            mesh.v.forEach(function (v, i) {
+                content = content.concat(v.bitangent.x.toFixed(4) + ' ' + v.bitangent.y.toFixed(4) + ' ' + v.bitangent.z.toFixed(4) + '\n');
+            });
+            return content;
+        };
+
         var generateObj = function (mesh) {
             var content = '';
             var offset = 0;
@@ -147,7 +163,10 @@ var exporter = {
                     var mesh = data.meshes.find(function (mesh) { return mesh.file == file; });
                     if (mesh) {
                         var name = file.split('.')[0] + '.obj';
-                        zip.file(name, generateObj(binary2VertexStruct(mesh, files[file].data)));
+                        var vertex = binary2VertexStruct(mesh, files[file].data);
+                        zip.file(name, generateObj(vertex));
+                        zip.file(file.split('.')[0] + '.tangent.txt', generateTangent(vertex));
+                        zip.file(file.split('.')[0] + '.bitangent.txt', generateBiangent(vertex));
                     } else {
                         zip.file(file, files[file].data, { binary: true });
                     }
