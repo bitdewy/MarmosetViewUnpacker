@@ -15,10 +15,11 @@
 	})
 
 	$('a.btn.btn-success.btn-block').click(function () {
-		var file = $(this).attr('data');
+		var file = $(this).attr('scene');
+		var sky = $(this).attr('sky');
 		var recv = function (a) {
 			var archive = new marmoset.Archive(a);
-			exporter.download(archive.files);
+			exporter.download(sky, archive.files);
 		};
 		var c = function () {
 			console.error('Package file (' + file + ') could not be retrieved.')

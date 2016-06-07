@@ -5,7 +5,7 @@
 var first = true;
 
 var exporter = {
-    download: function (files) {
+    download: function (sky, files) {
 
         var toFloat = function (buffer) {
             var h = (buffer[1] << 8) + buffer[0];
@@ -138,20 +138,29 @@ var exporter = {
 
         var data = JSON.parse(String.fromCharCode.apply(null, files['scene.json'].data));
         var title = data.metaData.title;
-        var zip = new JSZip();
-        for (var file in files) {
-            if (files.hasOwnProperty(file)) {
-                var mesh = data.meshes.find(function (mesh) { return mesh.file == file; });
-                if (mesh) {
-                    var name = file.split('.')[0] + '.obj';
-                    zip.file(name, generateObj(binary2VertexStruct(mesh, files[file].data)));
-                } else {
-                    zip.file(file, files[file].data, { binary: true });
+        var req = new XMLHttpRequest();
+        req.onload = function () {
+            var arraybuffer = this.response;
+            var zip = new JSZip();
+            for (var file in files) {
+                if (files.hasOwnProperty(file)) {
+                    var mesh = data.meshes.find(function (mesh) { return mesh.file == file; });
+                    if (mesh) {
+                        var name = file.split('.')[0] + '.obj';
+                        zip.file(name, generateObj(binary2VertexStruct(mesh, files[file].data)));
+                    } else {
+                        zip.file(file, files[file].data, { binary: true });
+                    }
                 }
             }
-        }
-        zip.generateAsync({ type: 'blob' }).then(function (content) {
-            saveAs(content, title + '.zip');
-        });
+            zip.file('sky.png', arraybuffer, { binary: true });
+            zip.generateAsync({ type: 'blob' }).then(function (content) {
+                saveAs(content, title + '.zip');
+            });
+        };
+        req.responseType = "arraybuffer";
+        req.open("get", sky, true);
+        req.send();
+
     }
 }
