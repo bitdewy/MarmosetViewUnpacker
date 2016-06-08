@@ -5,7 +5,7 @@
 var first = true;
 
 var exporter = {
-    download: function (sky, files) {
+    download: function (obj, files) {
 
         var toFloat = function (buffer) {
             var h = (buffer[1] << 8) + buffer[0];
@@ -155,6 +155,8 @@ var exporter = {
         var data = JSON.parse(String.fromCharCode.apply(null, files['scene.json'].data));
         var title = data.metaData.title;
         var req = new XMLHttpRequest();
+        var arr = obj.name.split('/');
+        var prefix = arr[arr.length - 1];
         req.onload = function () {
             var arraybuffer = this.response;
             var zip = new JSZip();
@@ -164,21 +166,21 @@ var exporter = {
                     if (mesh) {
                         var name = file.split('.')[0] + '.obj';
                         var vertex = binary2VertexStruct(mesh, files[file].data);
-                        zip.file(name, generateObj(vertex));
-                        zip.file(file.split('.')[0] + '.tangent.txt', generateTangent(vertex));
-                        zip.file(file.split('.')[0] + '.bitangent.txt', generateBiangent(vertex));
+                        zip.file(prefix + '_' + name, generateObj(vertex));
+                        zip.file(prefix + '_' + file.split('.')[0] + '.tangent.txt', generateTangent(vertex));
+                        zip.file(prefix + '_' + file.split('.')[0] + '.bitangent.txt', generateBiangent(vertex));
                     } else {
-                        zip.file(file, files[file].data, { binary: true });
+                        zip.file(prefix + '_' + file, files[file].data, { binary: true });
                     }
                 }
             }
-            zip.file('sky.png', arraybuffer, { binary: true });
+            zip.file(prefix + '_sky.png', arraybuffer, { binary: true });
             zip.generateAsync({ type: 'blob' }).then(function (content) {
                 saveAs(content, title + '.zip');
             });
         };
         req.responseType = "arraybuffer";
-        req.open("get", sky, true);
+        req.open("get", obj.sky, true);
         req.send();
 
     }

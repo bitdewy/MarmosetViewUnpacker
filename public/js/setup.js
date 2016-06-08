@@ -19,7 +19,7 @@
 		var sky = $(this).attr('sky');
 		var recv = function (a) {
 			var archive = new marmoset.Archive(a);
-			exporter.download(sky, archive.files);
+			exporter.download({sky:sky, name: file.split('.')[0]}, archive.files);
 		};
 		var c = function () {
 			console.error('Package file (' + file + ') could not be retrieved.')
