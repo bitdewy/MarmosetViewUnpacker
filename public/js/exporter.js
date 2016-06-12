@@ -176,7 +176,7 @@ var exporter = {
             }
             zip.file(prefix + '_sky.png', arraybuffer, { binary: true });
             zip.generateAsync({ type: 'blob' }).then(function (content) {
-                saveAs(content, title + '.zip');
+                saveAs(content, prefix + '.zip');
             });
         };
         req.responseType = "arraybuffer";
