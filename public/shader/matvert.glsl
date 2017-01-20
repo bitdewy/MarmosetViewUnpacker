@@ -23,13 +23,15 @@ varying lowp vec4 H;
 #ifdef TEXCOORD_SECONDARY
 varying mediump vec2 I;
 #endif
-vec3 hm(vec2 hn)
+
+vec3 ic(vec2 id)
 {
-	bool ho = (hn.y>(32767.1 / 65535.0));
-	hn.y = ho ? (hn.y - (32768.0 / 65535.0)) : hn.y;
-	vec3 r; r.xy = (2.0*65535.0 / 32767.0)*hn - vec2(1.0);
+	bool ie = (id.y > (32767.1 / 65535.0));
+	id.y = ie ? (id.y - (32768.0 / 65535.0)) : id.y;
+	vec3 r;
+	r.xy = (2.0 * 65535.0 / 32767.0) * id - vec2(1.0);
 	r.z = sqrt(clamp(1.0 - dot(r.xy, r.xy), 0.0, 1.0));
-	r.z = ho ? -r.z : r.z;
+	r.z = ie ? -r.z : r.z;
 	return r;
 }
 
@@ -38,18 +40,18 @@ vec4 m(mat4 o, vec3 p)
 	return o[0] * p.x + (o[1] * p.y + (o[2] * p.z + o[3]));
 }
 
-vec3 hu(mat4 o, vec3 hn)
+vec3 ih(mat4 o, vec3 id)
 {
-	return o[0].xyz*hn.x + o[1].xyz*hn.y + o[2].xyz*hn.z;
+	return o[0].xyz * id.x + o[1].xyz * id.y + o[2].xyz * id.z;
 }
 
 void main(void)
 {
 	gl_Position = m(uModelViewProjectionMatrix, vPosition.xyz);
 	j = vTexCoord;
-	E = hu(uSkyMatrix, hm(vTangent));
-	F = hu(uSkyMatrix, hm(vBitangent));
-	G = hu(uSkyMatrix, hm(vNormal));
+	E = ih(uSkyMatrix, ic(vTangent));
+	F = ih(uSkyMatrix, ic(vBitangent));
+	G = ih(uSkyMatrix, ic(vNormal));
 	D = m(uSkyMatrix, vPosition.xyz).xyz;
 #ifdef VERTEX_COLOR
 	H = vColor;

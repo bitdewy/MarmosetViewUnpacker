@@ -3,7 +3,7 @@ uniform sampler2D tInput0;
 uniform sampler2D tInput1;
 uniform sampler2D tInput2;
 #ifdef HIGHQ
-	uniform sampler2D tInput3;
+uniform sampler2D tInput3;
 #endif
 uniform vec4 uSamplesValid;
 varying highp vec2 d;

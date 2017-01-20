@@ -1,5 +1,6 @@
 precision highp float;
 uniform vec4 uStripParams;
+
 void main(void)
 {
 	vec2 c = gl_FragCoord.xy * uStripParams.xy - vec2(1.0, 1.0);

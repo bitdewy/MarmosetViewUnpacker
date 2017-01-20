@@ -1,5 +1,5 @@
 /*
-(Built: Wed, May 04, 2016  6:28:30 PM)
+(Built: Thu, Nov 24, 2016 11:30:22 PM)
 Marmoset Viewer Code and Tools
 
 Copyright (c) 2016 Marmoset LLC.
@@ -617,6 +617,7 @@ marmoset = {};
         this.modelViewBuffer = new Float32Array(16 * this.shadowCount);
         this.projectionBuffer = new Float32Array(16 * this.shadowCount);
         this.finalTransformBuffer = new Float32Array(16 * this.shadowCount);
+        this.inverseTransformBuffer = new Float32Array(16 * this.shadowCount);
         this.shadowTexelPadProjections = new Float32Array(4 * this.shadowCount);
         this.shadowsNeedUpdate = new Uint8Array(this.shadowCount);
         for (var d = 0; d < this.shadowsNeedUpdate.length; ++d) this.shadowsNeedUpdate[d] = 1;
@@ -667,9 +668,10 @@ marmoset = {};
             Matrix.mul(k, h, g);
             Matrix.mul(k, u, k);
             Matrix.copyToBuffer(this.modelViewBuffer, 16 * d, g);
-            Matrix.copyToBuffer(this.projectionBuffer,
-                16 * d, h);
-            Matrix.copyToBuffer(this.finalTransformBuffer, 16 * d, k)
+            Matrix.copyToBuffer(this.projectionBuffer, 16 * d, h);
+            Matrix.copyToBuffer(this.finalTransformBuffer, 16 * d, k);
+            Matrix.invert(k, k);
+            Matrix.copyToBuffer(this.inverseTransformBuffer, 16 * d, k)
         }
         e = !1;
         for (d = 0; d < c.length; ++d)
@@ -750,19 +752,23 @@ marmoset = {};
         0 < c.alphaTest && e.push("#define ALPHA_TEST");
         this.blend === b.alpha ? e.push("#define TRANSPARENCY_DITHER") : this.blend === b.none && e.push("#define NOBLEND");
         a.hints.mobile && e.push("#define MOBILE");
+        f = function (a) {
+            return 1 / (2 / 3 * 3.1415962 * (a * a + a + 1))
+        };
         c.useSkin && (e.push("#define SKIN"), this.skinParams = c.skinParams || {
             subdermisColor: [1, 1, 1],
-            transColor: [1, 0, 0, 0.5],
-            fresnelColor: [0.2, 0.2,
-                0.2, 0.5
-            ],
+            transColor: [1, 0, 0, 1],
+            fresnelColor: [0.2, 0.2, 0.2, 0.5],
             fresnelOcc: 1,
             fresnelGlossMask: 1,
             transSky: 0.5,
             shadowBlur: 0.5,
-            normalSmooth: 0.5
-        }, this.skinParams.fresnelIntegral = 1 / 3.14159 * (1 - 0.5 * this.skinParams.fresnelColor[3]), this.skinParams.transIntegral = 1 / 3.14159 * (1 - 0.5 * this.skinParams.transColor[3]), this.skinParams.transSky *= 1.25, this.skinParams.transIntegral *= 1.25, this.extrasTexCoordRanges.subdermisTex || e.push("#define SKIN_NO_SUBDERMIS_TEX"), this.extrasTexCoordRanges.translucencyTex || e.push("#define SKIN_NO_TRANSLUCENCY_TEX"), this.extrasTexCoordRanges.fuzzTex ||
-            e.push("#define SKIN_NO_FUZZ_TEX"));
+            normalSmooth: 0.5,
+            transScatter: 0,
+            transDepth: 0,
+            millimeterScale: 1
+        }, this.extrasTexCoordRanges.subdermisTex || e.push("#define SKIN_NO_SUBDERMIS_TEX"), this.extrasTexCoordRanges.translucencyTex || e.push("#define SKIN_NO_TRANSLUCENCY_TEX"), this.extrasTexCoordRanges.fuzzTex || e.push("#define SKIN_NO_FUZZ_TEX"), void 0 === this.skinParams.version && (this.skinParams.version = 1), 2 == this.skinParams.version ?
+            (e.push("#define SKIN_VERSION_2"), this.skinParams.shadowBlur *= 4, this.skinParams.shadowBlur = Math.min(this.skinParams.shadowBlur, 40), this.skinParams.transIntegral = f(0.5 * this.skinParams.transScatter), this.skinParams.fresnelIntegral = 1 / 3.14159 * (1 - 0.5 * this.skinParams.fresnelColor[3]), this.skinParams.transSky = 0) : (e.push("#define SKIN_VERSION_1"), this.skinParams.shadowBlur = 8 * Math.min(this.skinParams.shadowBlur, 1), this.skinParams.transDepth = 0, this.skinParams.transScatter = this.skinParams.transColor[3], this.skinParams.transIntegral = 1 / 3.14159 * (1 - 0.5 * this.skinParams.transScatter), this.skinParams.fresnelIntegral = 1 / 3.14159 * (1 - 0.5 * this.skinParams.fresnelColor[3]), this.skinParams.transSky *= 1.25, this.skinParams.transIntegral *= 1.25));
         c.aniso && (e.push("#define ANISO"), this.anisoParams = c.anisoParams || {
             strength: 1,
             tangent: [1, 0, 0],
@@ -778,8 +784,7 @@ marmoset = {};
         0 < this.horizonSmoothing && e.push("#define HORIZON_SMOOTHING");
         c.unlitDiffuse && e.push("#define DIFFUSE_UNLIT");
         this.extrasTexCoordRanges.emissiveTex && (e.push("#define EMISSIVE"), c.emissiveSecondaryUV && (e.push("#define EMISSIVE_SECONDARY_UV"), d = !0));
-        this.extrasTexCoordRanges.aoTex && (e.push("#define AMBIENT_OCCLUSION"),
-            c.aoSecondaryUV && (e.push("#define AMBIENT_OCCLUSION_SECONDARY_UV"), d = !0));
+        this.extrasTexCoordRanges.aoTex && (e.push("#define AMBIENT_OCCLUSION"), c.aoSecondaryUV && (e.push("#define AMBIENT_OCCLUSION_SECONDARY_UV"), d = !0));
         c.tangentOrthogonalize && e.push("#define TSPACE_ORTHOGONALIZE");
         c.tangentNormalize && e.push("#define TSPACE_RENORMALIZE");
         c.tangentGenerateBitangent && e.push("#define TSPACE_COMPUTE_BITANGENT");
@@ -787,8 +792,7 @@ marmoset = {};
         this.shader = a.shaderCache.fromURLs("matvert.glsl", "matfrag.glsl", e);
         e.push("#define STRIPVIEW");
         this.stripShader = a.shaderCache.fromURLs("matvert.glsl", "matfrag.glsl", e);
-        this.wireShader = a.shaderCache.fromURLs("wirevert.glsl",
-            "wirefrag.glsl");
+        this.wireShader = a.shaderCache.fromURLs("wirevert.glsl", "wirefrag.glsl");
         this.blend === b.alpha && (this.prepassShader = a.shaderCache.fromURLs("alphaprepassvert.glsl", "alphaprepassfrag.glsl"))
     }
     Material.prototype.bind = function (a) {
@@ -824,17 +828,15 @@ marmoset = {};
                 u = e.depthTextures[0].desc.height;
             m.uniform4f(n.uShadowMapSize, q, u, 1 / q, 1 / u);
             m.uniformMatrix4fv(n.uShadowMatrices, !1, c.finalTransformBuffer);
+            m.uniformMatrix4fv(n.uInvShadowMatrices, !1, c.inverseTransformBuffer);
             m.uniform4fv(n.uShadowTexelPadProjections, c.shadowTexelPadProjections);
             e.bindDepthTexture(p.tDepth0, 0);
             e.bindDepthTexture(p.tDepth1, 1);
-            e.bindDepthTexture(p.tDepth2,
-                2)
+            e.bindDepthTexture(p.tDepth2, 2)
         }
-        g && (m.uniform3fv(n.uSubdermisColor, g.subdermisColor), m.uniform4fv(n.uTransColor, g.transColor), m.uniform4fv(n.uFresnelColor, g.fresnelColor), m.uniform1f(n.uFresnelOcc, g.fresnelOcc), m.uniform1f(n.uFresnelGlossMask, g.fresnelGlossMask), m.uniform1f(n.uFresnelIntegral, g.fresnelIntegral), m.uniform1f(n.uTransIntegral, g.transIntegral), m.uniform1f(n.uTransSky, g.transSky), m.uniform1f(n.uSkinShadowBlur, 8 * Math.min(g.shadowBlur, 1)), m.uniform1f(n.uNormalSmooth, g.normalSmooth), (l = this.extrasTexCoordRanges.subdermisTex) &&
-            m.uniform4fv(n.uTexRangeSubdermis, l), (l = this.extrasTexCoordRanges.translucencyTex) && m.uniform4fv(n.uTexRangeTranslucency, l), (l = this.extrasTexCoordRanges.fuzzTex) && m.uniform4fv(n.uTexRangeFuzz, l));
+        g && (m.uniform3fv(n.uSubdermisColor, g.subdermisColor), m.uniform4fv(n.uTransColor, g.transColor), m.uniform1f(n.uTransScatter, g.transScatter), m.uniform4fv(n.uFresnelColor, g.fresnelColor), m.uniform1f(n.uFresnelOcc, g.fresnelOcc), m.uniform1f(n.uFresnelGlossMask, g.fresnelGlossMask), m.uniform1f(n.uFresnelIntegral, g.fresnelIntegral), m.uniform1f(n.uTransIntegral, g.transIntegral), m.uniform1f(n.uSkinTransDepth, g.transDepth), m.uniform1f(n.uTransSky, g.transSky), m.uniform1f(n.uSkinShadowBlur, g.shadowBlur), m.uniform1f(n.uNormalSmooth, g.normalSmooth), (l = this.extrasTexCoordRanges.subdermisTex) && m.uniform4fv(n.uTexRangeSubdermis, l), (l = this.extrasTexCoordRanges.translucencyTex) && m.uniform4fv(n.uTexRangeTranslucency, l), (l = this.extrasTexCoordRanges.fuzzTex) && m.uniform4fv(n.uTexRangeFuzz, l));
         k && (m.uniform4fv(n.uFresnelColor, k.fresnelColor), m.uniform1f(n.uFresnelOcc, k.fresnelOcc), m.uniform1f(n.uFresnelGlossMask, k.fresnelGlossMask), m.uniform1f(n.uFresnelIntegral, k.fresnelIntegral), (l = this.extrasTexCoordRanges.fuzzTex) && m.uniform4fv(n.uTexRangeFuzz, l));
-        h && (m.uniform3fv(n.uAnisoTangent, h.tangent),
-            m.uniform1f(n.uAnisoStrength, h.strength), m.uniform1f(n.uAnisoIntegral, h.integral), (l = this.extrasTexCoordRanges.anisoTex) && m.uniform4fv(n.uTexRangeAniso, l));
+        h && (m.uniform3fv(n.uAnisoTangent, h.tangent), m.uniform1f(n.uAnisoStrength, h.strength), m.uniform1f(n.uAnisoIntegral, h.integral), (l = this.extrasTexCoordRanges.anisoTex) && m.uniform4fv(n.uTexRangeAniso, l));
         if (l = this.extrasTexCoordRanges.emissiveTex) m.uniform4fv(n.uTexRangeEmissive, l), m.uniform1f(n.uEmissiveScale, this.emissiveIntensity);
         (l = this.extrasTexCoordRanges.aoTex) && m.uniform4fv(n.uTexRangeAO, l);
         r.albedo.bind(p.tAlbedo);
