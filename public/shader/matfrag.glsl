@@ -144,7 +144,7 @@ void main(void)
 	dF dG;
 #ifdef SKIN
 #ifdef SKIN_VERSION_1
-	dH(dG, SHADOW_KERNEL + SHADOW_KERNEL * df.dI)
+	dH(dG, SHADOW_KERNEL + SHADOW_KERNEL * df.dI);
 #else
 	dJ dK;
 	float dL = SHADOW_KERNEL + SHADOW_KERNEL * df.dI;
