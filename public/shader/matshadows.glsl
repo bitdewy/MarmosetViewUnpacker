@@ -1,8 +1,8 @@
 #ifdef SHADOW_COUNT
 #ifdef MOBILE
-#define SHADOW_KERNEL(4.0 / 1536.0)
+#define SHADOW_KERNEL (4.0 / 1536.0)
 #else
-#define SHADOW_KERNEL(4.0 / 2048.0)
+#define SHADOW_KERNEL (4.0 / 2048.0)
 #endif
 
 highp vec4 m(highp mat4 o, highp vec3 p)
