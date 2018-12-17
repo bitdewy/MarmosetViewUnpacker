@@ -1,22 +1,23 @@
 precision highp float;
 attribute vec3 vPosition;
 attribute vec2 vTexCoord;
+uniform mat4 uMeshTransform;
 uniform mat4 uViewProjection;
-varying vec2 iH;
+varying vec2 jG;
 #ifdef ALPHA_TEST
-varying mediump vec2 j;
+varying mediump vec2 d;
+uniform vec2 uUVOffset;
 #endif
-
-vec4 m(mat4 o, vec3 p)
+vec4 h(mat4 i, vec3 p)
 {
-	return o[0] * p.x + (o[1] * p.y + (o[2] * p.z + o[3]));
+	return i[0] * p.x + (i[1] * p.y + (i[2] * p.z + i[3]));
 }
-
 void main(void)
 {
-	gl_Position = m(uViewProjection, vPosition);
-	iH = gl_Position.zw;
+	vec3 p = h(uMeshTransform, vPosition).xyz;
+	gl_Position = h(uViewProjection, p);
+	jG = gl_Position.zw;
 #ifdef ALPHA_TEST
-	j = vTexCoord;
+	d = vTexCoord + uUVOffset;
 #endif
 }

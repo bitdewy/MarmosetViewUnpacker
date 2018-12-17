@@ -1,9 +1,9 @@
 precision highp float;
 uniform sampler2D tInput;
-varying highp vec2 d;
+varying highp vec2 j;
 
 void main(void)
 {
-	float A = 0.25 / 256.0;
-	gl_FragColor = 0.25 * (texture2D(tInput, d + vec2(A, A)) + texture2D(tInput, d + vec2(A, -A)) + texture2D(tInput, d + vec2(-A, A)) + texture2D(tInput, d + vec2(-A, -A)));
+	float o = 0.25 / 256.0;
+	gl_FragColor = 0.25 * (texture2D(tInput, j + vec2(o, o)) + texture2D(tInput, j + vec2(o, -o)) + texture2D(tInput, j + vec2(-o, o)) + texture2D(tInput, j + vec2(-o, -o)));
 }

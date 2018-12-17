@@ -1,13 +1,13 @@
 #ifdef SHADOW_COUNT
 #ifdef MOBILE
-#define SHADOW_KERNEL (4.0 / 1536.0)
+#define SHADOW_KERNEL (4.0/1536.0)
 #else
-#define SHADOW_KERNEL (4.0 / 2048.0)
+#define SHADOW_KERNEL (4.0/2048.0)
 #endif
 
-highp vec4 m(highp mat4 o, highp vec3 p)
+highp vec4 h(highp mat4 i,highp vec3 p)
 {
-	return o[0] * p.x + (o[1] * p.y + (o[2] * p.z + o[3]));
+	return i[0] * p.x + (i[1] * p.y + (i[2] * p.z + i[3]));
 }
 
 uniform sampler2D tDepth0;
@@ -18,153 +18,174 @@ uniform sampler2D tDepth2;
 #endif
 #endif
 uniform highp vec2 uShadowKernelRotation;
-uniform highp vec4 uShadowMapSize;
+uniform highp vec2 uShadowMapSize;
 uniform highp mat4 uShadowMatrices[SHADOW_COUNT];
-uniform highp mat4 uInvShadowMatrices[SHADOW_COUNT];
 uniform highp vec4 uShadowTexelPadProjections[SHADOW_COUNT];
-
-highp float fN(highp vec3 C)
+#ifndef MOBILE
+uniform highp mat4 uInvShadowMatrices[SHADOW_COUNT];
+#endif
+highp float hJ(highp vec3 G)
 {
-	return (C.x + C.y * (1.0 / 255.0)) + C.z * (1.0 / 65025.0);
+#ifdef SHADOW_NATIVE_DEPTH
+	return G.x;
+#else
+	return (G.x + G.y * (1.0 / 255.0)) + G.z * (1.0 / 65025.0);
+#endif
 }
-
-float fO(sampler2D fP, highp vec2 fE, highp float fQ)
+#ifndef SHADOW_COMPARE
+#define SHADOW_COMPARE(a,b) ((a) < (b) ? 1.0 : 0.0)
+#endif
+#ifndef SHADOW_CLIP
+#define SHADOW_CLIP(c,v) v
+#endif
+float hK(sampler2D hL, highp vec2 hA, highp float H)
 {
 #ifndef MOBILE
-	highp vec2 c = fE * uShadowMapSize.xy;
-	highp vec2 a = floor(c) * uShadowMapSize.zw, b = ceil(c) * uShadowMapSize.zw;
-	highp vec4 dK;
-	dK.x = fN(texture2D(fP, a).xyz);
-	dK.y = fN(texture2D(fP, vec2(b.x, a.y)).xyz);
-	dK.z = fN(texture2D(fP, vec2(a.x, b.y)).xyz);
-	dK.w = fN(texture2D(fP, b).xyz);
-	highp vec4 fR;
-	fR.x = fQ < dK.x ? 1.0 : 0.0;
-	fR.y = fQ < dK.y ? 1.0 : 0.0;
-	fR.z = fQ < dK.z ? 1.0 : 0.0;
-	fR.w = fQ < dK.w ? 1.0 : 0.0;
-	highp vec2 w = c - a * uShadowMapSize.xy;
-	vec2 s = (w.y * fR.zw + fR.xy) - w.y * fR.xy;
+	highp vec2 c = hA * uShadowMapSize.x;
+	highp vec2 a = floor(c) * uShadowMapSize.y, b=ceil(c) * uShadowMapSize.y;
+	highp vec4 eE;
+	eE.x = hJ(texture2D(hL, a).xyz);
+	eE.y = hJ(texture2D(hL, vec2(b.x, a.y)).xyz);
+	eE.z = hJ(texture2D(hL, vec2(a.x, b.y)).xyz);
+	eE.w = hJ(texture2D(hL, b).xyz);
+	highp vec4 hM;
+	hM.x = SHADOW_COMPARE(H, eE.x);
+	hM.y = SHADOW_COMPARE(H, eE.y);
+	hM.z = SHADOW_COMPARE(H, eE.z);
+	hM.w = SHADOW_COMPARE(H, eE.w);
+	highp vec2 w = c - a * uShadowMapSize.x;
+	vec2 s = (w.y * hM.zw + hM.xy) - w.y * hM.xy;
 	return (w.x * s.y + s.x) - w.x * s.x;
 #else
-	highp float C = fN(texture2D(fP, fE.xy).xyz);
-	return fQ < C ? 1.0 : 0.0;
+	highp float G = hJ(texture2D(hL, hA.xy).xyz);
+	return SHADOW_COMPARE(H,G);
 #endif
 }
 
-highp float fS(sampler2D fP, highp vec3 fE, float fT)
+highp float hN(sampler2D hL, highp vec3 hA, float hO)
 {
-	highp vec2 v = uShadowKernelRotation * fT;
+	highp vec2 l = uShadowKernelRotation * hO;
 	float s;
-	s = fO(fP, fE.xy + v, fE.z);
-	s += fO(fP, fE.xy - v, fE.z);
-	s += fO(fP, fE.xy + vec2(-v.y, v.x), fE.z);
-	s += fO(fP, fE.xy + vec2(v.y, -v.x), fE.z);
+	s = hK(hL, hA.xy + l, hA.z);
+	s += hK(hL, hA.xy - l, hA.z);
+	s += hK(hL, hA.xy + vec2(-l.y, l.x), hA.z);
+	s += hK(hL, hA.xy + vec2(l.y, -l.x), hA.z);
 	s *= 0.25;
 	return s * s;
 }
 
-struct dF
+struct ev
 {
-	float dR[LIGHT_COUNT];
+	float eL[LIGHT_COUNT];
 };
 
-void dH(out dF ss, float fT)
+void eB(out ev ss, float hO)
 {
-	highp vec3 fU[SHADOW_COUNT];
-	vec3 fC = gl_FrontFacing ? G : -G;
-	for (int u = 0; u < SHADOW_COUNT; ++u)
+	highp vec3 hP[SHADOW_COUNT];
+	vec3 hu = gl_FrontFacing ? dC : -dC;
+	for (int k = 0; k < SHADOW_COUNT; ++k)
 	{
-		vec4 fV = uShadowTexelPadProjections[u];
-		float fW = fV.x * D.x + (fV.y * D.y + (fV.z * D.z + fV.w));
-#ifdef MOBILE
-		fW *= .001 + fT;
-#else
-		fW *= .0005 + 0.5 * fT;
-#endif
-		highp vec4 fX = m(uShadowMatrices[u], D + fW * fC);
-		fU[u] = fX.xyz / fX.w;
+		vec4 hQ = uShadowTexelPadProjections[k];
+		float hR = hQ.x * dv.x + (hQ.y * dv.y + (hQ.z * dv.z + hQ.w));
+	#ifdef MOBILE
+		hR *= .001 + hO;
+	#else
+		hR *= .0005 + 0.5 * hO;
+	#endif
+		highp vec4 hS = h(uShadowMatrices[k], dv + hR * hu);
+		hP[k] = hS.xyz / hS.w;
 	}
-	float J;
-#if SHADOW_COUNT > 0
-	J = fS(tDepth0, fU[0], fT);
-	ss.dR[0] = J;
-#endif
-#if SHADOW_COUNT > 1
-	J = fS(tDepth1, fU[1], fT);
-	ss.dR[1] = J;
-#endif
-#if SHADOW_COUNT > 2
-	J = fS(tDepth2, fU[2], fT);
-	ss.dR[2] = J;
-#endif
-	for (int u = SHADOW_COUNT; u < LIGHT_COUNT; ++u)
+
+	float m;
+	#if SHADOW_COUNT > 0
+	m = hN(tDepth0, hP[0], hO);
+	ss.eL[0] = SHADOW_CLIP(hP[0].xy, m);
+	#endif
+	#if SHADOW_COUNT > 1
+	m = hN(tDepth1, hP[1], hO);
+	ss.eL[1] = SHADOW_CLIP(hP[1].xy, m);
+	#endif
+	#if SHADOW_COUNT > 2
+	m = hN(tDepth2, hP[2], hO);
+	ss.eL[2] = SHADOW_CLIP(hP[2].xy, m);
+	#endif
+	for (int k = SHADOW_COUNT; k < LIGHT_COUNT; ++k)
 	{
-		ss.dR[u] = 1.0;
+		ss.eL[k] = 1.0;
 	}
 }
 
-struct dJ
+struct eD
 {
-	highp float dK[LIGHT_COUNT];
+	highp float eE[LIGHT_COUNT];
 };
 
-highp vec4 fY(sampler2D fP, highp vec2 fE, highp mat4 fZ)
+#ifdef MOBILE
+void eG(out eD ss, float hO)
 {
-	highp vec4 hc;
-	hc.xy = fE;
+	for (int k = 0; k < LIGHT_COUNT; ++k)
+	{
+		ss.eE[k] = 1.0;
+	}
+}
+#else
+highp vec4 hT(sampler2D hL, highp vec2 hA, highp mat4 hU)
+{
+	highp vec4 E;
+	E.xy = hA;
 #ifndef MOBILE
-	highp vec2 c = fE * uShadowMapSize.xy;
-	highp vec2 a = floor(c) * uShadowMapSize.zw, b = ceil(c) * uShadowMapSize.zw;
-	highp vec4 fR;
-	fR.x = fN(texture2D(fP, a).xyz);
-	fR.y = fN(texture2D(fP, vec2(b.x, a.y)).xyz);
-	fR.z = fN(texture2D(fP, vec2(a.x, b.y)).xyz);
-	fR.w = fN(texture2D(fP, b).xyz);
-	highp vec2 w = c - a * uShadowMapSize.xy;
-	vec2 s = (w.y * fR.zw + fR.xy) - w.y * fR.xy;
-	hc.z = (w.x * s.y + s.x) - w.x * s.x;
+	highp vec2 c = hA * uShadowMapSize.x;
+	highp vec2 a = floor(c) * uShadowMapSize.y, b = ceil(c) * uShadowMapSize.y;
+	highp vec4 hM;
+	hM.x = hJ(texture2D(hL, a).xyz);
+	hM.y = hJ(texture2D(hL, vec2(b.x, a.y)).xyz);
+	hM.z = hJ(texture2D(hL, vec2(a.x, b.y)).xyz);
+	hM.w = hJ(texture2D(hL, b).xyz);
+	highp vec2 w = c - a * uShadowMapSize.x;
+	vec2 s = (w.y * hM.zw + hM.xy) - w.y * hM.xy;
+	E.z = (w.x * s.y + s.x) - w.x * s.x;
 #else
-	hc.z = fN(texture2D(fP, fE.xy).xyz);
+	E.z = hJ(texture2D(hL, hA.xy).xyz);
 #endif
-	hc = m(fZ, hc.xyz);
-	hc.xyz /= hc.w;
-	return hc;
+	E = h(hU, E.xyz);
+	E.xyz /= E.w;
+	return E;
 }
 
-void dM(out dJ ss, float fT)
+void eG(out eD ss, float hO)
 {
-	highp vec3 hd[SHADOW_COUNT];
-	vec3 fC = gl_FrontFacing ? G : -G;
-	fC *= 0.6;
-	for (int u = 0; u < SHADOW_COUNT; ++u)
+	highp vec3 hV[SHADOW_COUNT];
+	vec3 hu = gl_FrontFacing ? dC : -dC;
+	hu *= 0.6;
+	for (int k = 0; k < SHADOW_COUNT; ++k)
 	{
-		vec4 fV = uShadowTexelPadProjections[u];
-		float fW = fV.x * D.x + (fV.y * D.y + (fV.z * D.z + fV.w));
-#ifdef MOBILE
-		fW *= .001 + fT;
-#else
-		fW *= .0005 + 0.5 * fT;
-#endif
-		highp vec4 fX = m(uShadowMatrices[u], D - fW * fC);
-		hd[u] = fX.xyz / fX.w;
+		vec4 hQ = uShadowTexelPadProjections[k];
+		float hR = hQ.x * dv.x + (hQ.y * dv.y + (hQ.z * dv.z + hQ.w));
+	#ifdef MOBILE
+		hR *= .001 + hO;
+	#else
+		hR *= .0005 + 0.5 * hO;
+	#endif
+		highp vec4 hS = h(uShadowMatrices[k], dv - hR * hu);
+		hV[k] = hS.xyz / hS.w;
 	}
-	highp vec4 he;
-#if SHADOW_COUNT > 0
-	he = fY(tDepth0, hd[0].xy, uInvShadowMatrices[0]);
-	ss.dK[0] = length(D.xyz - he.xyz);
-#endif
-#if SHADOW_COUNT > 1
-	he = fY(tDepth1, hd[1].xy, uInvShadowMatrices[1]);
-	ss.dK[1] = length(D.xyz - he.xyz);
-#endif
-#if SHADOW_COUNT > 2
-	he = fY(tDepth2, hd[2].xy, uInvShadowMatrices[2]);
-	ss.dK[2] = length(D.xyz - he.xyz);
-#endif
-	for (int u = SHADOW_COUNT; u < LIGHT_COUNT; ++u)
+	highp vec4 hW;
+	#if SHADOW_COUNT > 0
+	hW = hT(tDepth0, hV[0].xy, uInvShadowMatrices[0]);
+	ss.eE[0] = length(dv.xyz - hW.xyz);
+	#endif
+	#if SHADOW_COUNT > 1
+	hW = hT(tDepth1, hV[1].xy, uInvShadowMatrices[1]);
+	ss.eE[1] = length(dv.xyz - hW.xyz);
+	#endif
+	#if SHADOW_COUNT > 2
+	hW = hT(tDepth2, hV[2].xy, uInvShadowMatrices[2]);
+	ss.eE[2] = length(dv.xyz - hW.xyz);
+	#endif
+	for (int k = SHADOW_COUNT; k < LIGHT_COUNT; ++k)
 	{
-		ss.dK[u] = 1.0;
+		ss.eE[k] = 1.0;
 	}
 }
+#endif
 #endif

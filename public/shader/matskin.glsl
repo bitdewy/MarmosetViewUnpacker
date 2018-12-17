@@ -1,11 +1,17 @@
 #ifdef SKIN
+#ifndef SKIN_NO_SUBDERMIS_TEX
 uniform vec4 uTexRangeSubdermis;
+#endif
+#ifndef SKIN_NO_TRANSLUCENCY_TEX
 uniform vec4 uTexRangeTranslucency;
+#endif
+#ifndef SKIN_NO_FUZZ_TEX
 uniform vec4 uTexRangeFuzz;
-uniform vec3 uSubdermisColor;
+#endif
 uniform vec4 uTransColor;
-uniform float uTransScatter;
 uniform vec4 uFresnelColor;
+uniform vec3 uSubdermisColor;
+uniform float uTransScatter;
 uniform float uFresnelOcc;
 uniform float uFresnelGlossMask;
 uniform float uTransSky;
@@ -14,165 +20,161 @@ uniform float uTransIntegral;
 uniform float uSkinTransDepth;
 uniform float uSkinShadowBlur;
 uniform float uNormalSmooth;
-
-struct de
+struct dX
 {
-	vec3 hf;
-	vec3 hh, hi, hj, fj;
-	vec3 di, dm, hk;
-	vec3 hl;
-	vec3 hm;
-	vec3 hn;
-	vec3 ho;
-	float hu;
-	float hv;
-	float hA;
-	float dI;
+	vec3 hX
+	vec3 hY, hZ, ic, he;
+	vec3 ec, eh, id;
+	vec3 ie;
+	vec3 ih;
+	vec3 ii;
+	vec3 ij;
+	float ik;
+	float il;
+	float im;
+	float eC;
 };
-
-void dh(out de s)
+void dZ(out dX s)
 {
-	vec4 J;
+	vec4 m;
 #ifdef SKIN_NO_SUBDERMIS_TEX
-	s.hf = uSubdermisColor;
-	s.hA = 1.0;
+	s.hX = uSubdermisColor;
+	s.im = 1.0;
 #else
-	J = R(j, uTexRangeSubdermis);
-	s.hf = L(J.xyz);
-	s.hA = J.w * J.w;
+	m = dM(d, uTexRangeSubdermis);
+	s.hX = dG(m.xyz);
+	s.im = m.w * m.w;
 #endif
-	s.ho = uTransColor.rgb;
-	s.hu = uTransScatter;
+	s.ij = uTransColor.rgb;
+	s.ik = uTransScatter;
 #ifdef SKIN_VERSION_1
-	s.dI = uSkinShadowBlur * s.hA;
+	s.eC = uSkinShadowBlur * s.im;
 #else
-	s.hv = max(max(s.ho.r, s.ho.g), s.ho.b) * uTransColor.a;
-	float hB = max(s.hf.r, max(s.hf.g, s.hf.b));
-	hB = 1.0 - hB;
-	hB *= hB;
-	hB *= hB;
-	hB *= hB;
-	hB = 1.0 - (hB * hB);
-	s.hA *= hB;
-	s.dI = uSkinShadowBlur * s.hA * dot(s.hf.rgb, vec3(0.333, 0.334, 0.333));
+	s.il = max(max(s.ij.r, s.ij.g), s.ij.b) * uTransColor.a;
+	float io = max(s.hX.r, max(s.hX.g, s.hX.b));
+	io = 1.0 - io;
+	io *= io;
+	io *= io;
+	io *= io;
+	io = 1.0 - (io * io);
+	s.im *= io;
+	s.eC = uSkinShadowBlur * s.im * dot(s.hX.rgb, vec3(0.333, 0.334, 0.333));
 #endif
 #ifndef SKIN_NO_TRANSLUCENCY_TEX
-	J = R(j, uTexRangeTranslucency);
-	s.ho *= L(J.xyz);
+	m = dM(d, uTexRangeTranslucency);
+	s.ij *= dG(m.xyz);
 #endif
-	s.hl = fJ(tNormal, j, uNormalSmooth * s.hA);
-	vec3 hC, hD, hE;
-	eO(hC, hD, hE, s.hl);
-	s.dm = s.hh = hC + hD + hE;
+	s.ie = hF(tNormal, d, uNormalSmooth * s.im);
+	vec3 iu, iv, iA;
+	fK(iu, iv, iA, s.ie);
+	s.eh = s.hY = iu + iv + iA;
 #ifdef SKIN_VERSION_1
-	s.di = eU(hC, hD, hE, vec3(1.0, 0.6667, 0.25), s.hf);
+	s.ec = fQ(iu, iv, iA, vec3(1.0, 0.6667, 0.25), s.hX);
 #else
-	s.di = eU(hC, hD, hE, vec3(1.0, 0.6667, 0.25), s.hf * 0.2 + vec3(0.1));
+	s.ec = fQ(iu, iv, iA, vec3(1.0, 0.6667, 0.25), s.hX * 0.2 + vec3(0.1));
 #endif
 #ifdef SKIN_VERSION_1
-	vec3 hF, hG, hH;
-	eO(hF, hG, hH, -s.hl);
-	s.hk = eS(hF, hG, hH, vec3(1.0, 0.4444, 0.0625), s.hu);
-	s.hk *= uTransSky;
+	vec3 iB, iC, iD;
+	fK(iB, iC, iD, -s.ie);
+	s.id = fO(iB, iC, iD, vec3(1.0, 0.4444, 0.0625), s.ik);
+	s.id *= uTransSky;
 #else
-	s.hk = vec3(0.0);
+	s.id = vec3(0.0);
 #endif
-	s.hi = s.hj = s.fj = vec3(0.0);
-	s.hf *= 0.5;
-	s.hu *= 0.5;
-	s.hm = uFresnelColor.rgb;
-	s.hn = uFresnelColor.aaa * vec3(1.0, 0.5, 0.25);
+	s.hZ = s.ic = s.he = vec3(0.0);
+	s.hX *= 0.5;
+	s.ik *= 0.5;
+	s.ih = uFresnelColor.rgb;
+	s.ii = uFresnelColor.aaa * vec3(1.0, 0.5, 0.25);
 #ifndef SKIN_NO_FUZZ_TEX
-	J = R(j, uTexRangeFuzz);
-	s.hm *= L(J.rgb);
+	m = dM(d, uTexRangeFuzz);
+	s.ih *= dG(m.rgb);
 #endif
 }
-
-void dQ(inout de s, float hI, float hJ, vec3 dN, vec3 N, vec3 dP)
+void eK(inout dX s, float iE, float iF, vec3 eH, vec3 dI, vec3 eJ)
 {
-	float en = dot(dN, N);
-	float eo = dot(dN, s.hl);
-	float dT = saturate((1.0 / 3.1415926) * en);
-	float fm = hI * hI;
-	fm *= fm;
-	fm = saturate(6.0 * fm);
+	float fk = dot(eH, dI);
+	float fl = dot(eH, s.ie);
+	float eN = saturate((1.0 / 3.1415926) * fk);
+	float hi = iE * iE;
+	hi *= hi;
+	hi = saturate(6.0 * hi);
 #ifdef SKIN_VERSION_1
-	vec3 hK = eE(eo, s.hf);
+	vec3 iG = fB(fl, s.hX);
 #else
-	vec3 hK = em(en, eo, s.hf);
+	vec3 iG = fj(fk, fl, s.hX);
 #endif
-	float hL = eD(-eo, s.hu);
-	vec3 hj = vec3(hL * hL);
+	float iH = fA(-fl, s.ik);
+	vec3 ic = vec3(iH * iH);
 #ifdef SKIN_VERSION_1
 #ifdef SHADOW_COUNT
-	vec3 hM = vec3(hI);
-	float hN = saturate(fm - 2.0 * (hI * hI));
-	hM += hN * s.hf;
-	float hO = hI;
+	vec3 iI = vec3(iE);
+	float iJ = saturate(hi - 2.0 * (iE * iE));
+	iI += iJ * s.hX;
+	float iK = iE;
 #endif
 #else
 #ifdef SHADOW_COUNT
-	vec3 hM;
-	highp vec3 hP = (0.995 * s.hf) + vec3(0.005, 0.005, 0.005);
-	highp vec3 hQ = vec3(1.0) - hP;
-	hP = mix(hP, hQ, hI);
-	float hR = sqrt(hI);
-	vec3 hS = 2.0 * vec3(1.0 - hR);
-	hR = 1.0 - hR;
-	hR = (1.0 - hR * hR);
-	hM = saturate(pow(hP * hR, hS));
-	highp float hT = 0.35 / (uSkinTransDepth + 0.001);
-	highp float hU = saturate(hJ * hT);
-	hU = saturate(1.0 - hU);
-	hU *= hU;
-	highp vec3 hV = vec3((-3.0 * hU) + 3.15);
-	highp vec3 hW = (0.9975 * s.ho) + vec3(0.0025, 0.0025, 0.0025);
-	highp float hB = saturate(10.0 * dot(hW, hW));
-	vec3 hO = pow(hW * hU, hV) * hB;
+	vec3 iI;
+	highp vec3 iL = (0.995 * s.hX) + vec3(0.005, 0.005, 0.005);
+	highp vec3 iM = vec3(1.0) - iL;
+	iL = mix(iL, iM, iE);
+	float iN = sqrt(iE);
+	vec3 iO = 2.0 * vec3(1.0 - iN);
+	iN = 1.0 - iN;
+	iN = (1.0 - iN * iN);
+	iI = saturate(pow(iL * iN, iO));
+	highp float iP = 0.35 / (uSkinTransDepth + 0.001);
+	highp float iQ = saturate(iF * iP);
+	iQ = saturate(1.0 - iQ);
+	iQ *= iQ;
+	highp vec3 iR = vec3((-3.0 * iQ) + 3.15);
+	highp vec3 iS = (0.9975 * s.ij) + vec3(0.0025, 0.0025, 0.0025);
+	highp float io = saturate(10.0 * dot(iS, iS));
+	vec3 iK = pow(iS * iQ, iR) * io;
 #else
-	hj = vec3(0.0);
+	ic = vec3(0.0);
 #endif
 #endif
-	float fn = eD(eo, s.hn.z);
+	float hj = fA(fl, s.ii.z);
 #ifdef SHADOW_COUNT
-	vec3 fo = mix(vec3(1.0), hM, uFresnelOcc);
-	vec3 fj = fn * fo;
+	vec3 hk = mix(vec3(1.0), iI, uFresnelOcc);
+	vec3 he = hj * hk;
 #else
-	vec3 fj = vec3(fn);
+	vec3 he = vec3(hj);
 #endif
 #ifdef SHADOW_COUNT
-	hK *= hM;
-	dT *= fm;
-	hj *= hO;
-#endif
-	s.fj = fj * dP + s.fj;
-	s.hj = hj * dP + s.hj;
-	s.hi = hK * dP + s.hi;
-	s.hh = dT * dP + s.hh;
+	iG *= iI;
+	eN *= hi;
+	ic *= iK;
+#endif 
+	s.he = he * eJ + s.he;
+	s.ic = ic * eJ + s.ic;
+	s.hZ = iG * eJ + s.hZ;
+	s.hY = eN * eJ + s.hY;
 }
-
-void dW(out vec3 dn, out vec3 diff_extra, inout de s, vec3 T, vec3 N, float V)
+void eQ(out vec3 ei, out vec3 diff_extra, inout dX s, vec3 dO, vec3 dI, float dQ)
 {
-	s.fj *= uFresnelIntegral;
-	float eL = dot(T, N);
-	vec2 fu = eK(vec2(eL, eL), s.hn.xy);
-	s.fj = s.dm * fu.x + (s.fj * fu.y);
-	s.fj *= s.hm;
-	float fv = saturate(1.0 + -uFresnelGlossMask * V);
-	s.fj *= fv * fv;
-	s.hj = s.hj * uTransIntegral;
+	s.he *= uFresnelIntegral;
+	float fH = dot(dO, dI);
+	vec2 hl = fG(vec2(fH, fH), s.ii.xy);
+	s.he = s.eh * hl.x + (s.he * hl.y);
+	s.he *= s.ih;
+	float hm = saturate(1.0 + -uFresnelGlossMask * dQ);
+	s.he *= hm * hm;
+	s.ic = s.ic * uTransIntegral;
 #ifdef SKIN_VERSION_1
-	s.hi = (s.hi * eG(s.hf)) + s.di;
-#else
-	s.hi = (s.hi * eC(s.hf)) + s.di;
-#endif
-	dn = mix(s.hh, s.hi, s.hA);
+	s.hZ = (s.hZ * fD(s.hX)) + s.ec;
+#else 
+	s.hZ = (s.hZ * fv(s.hX)) + s.ec;
+#endif 
+	ei = mix(s.hY, s.hZ, s.im);
 #ifdef SKIN_VERSION_1
-	s.hj = (s.hj + s.hk) * s.ho;
-	diff_extra = (s.fj + s.hj) * s.hA;
+	s.ic = (s.ic + s.id) * s.ij;
+	diff_extra = (s.he + s.ic) * s.im;
 #else
-	dn += s.hj * s.hv;
-	diff_extra = s.fj * s.hA;
+	ei += s.ic * s.il;
+	diff_extra = s.he * s.im;
 #endif
 }
 #endif

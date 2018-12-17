@@ -1,12 +1,11 @@
 precision mediump float;
 #include <matdither.glsl>
 uniform sampler2D tAlbedo;
-varying mediump vec2 j;
-
+varying mediump vec2 d;
 void main()
 {
-	float k = texture2D(tAlbedo, j).a;
-	if (k <= l(j.x))
+	float e = texture2D(tAlbedo, d).a;
+	if ( e<= f(d.x))
 	{
 		discard;
 	}

@@ -1,56 +1,56 @@
-vec3 L(vec3 c)
+vec3 dG(vec3 c)
 {
 	return c * c;
 }
 
-vec3 O(vec3 n)
+vec3 dJ(vec3 n)
 {
-	vec3 fA = E;
-	vec3 fB = F;
-	vec3 fC = gl_FrontFacing ? G : -G;
+	vec3 hn = dA;
+	vec3 ho = dB;
+	vec3 hu = gl_FrontFacing ? dC : -dC;
 #ifdef TSPACE_RENORMALIZE
-	fC = normalize(fC);
+	hu=normalize(hu);
 #endif
 #ifdef TSPACE_ORTHOGONALIZE
-	fA -= dot(fA, fC) * fC;
+	hn -= dot(hn, hu) * hu;
 #endif
 #ifdef TSPACE_RENORMALIZE
-	fA = normalize(fA);
+	hn = normalize(hn);
 #endif
 #ifdef TSPACE_ORTHOGONALIZE
-	fB = (fB - dot(fB, fC) * fC) - dot(fB, fA) * fA;
+	ho = (ho - dot(ho, hu) * hu) - dot(ho, hn) * hn;
 #endif
 #ifdef TSPACE_RENORMALIZE
-	fB = normalize(fB);
+	ho = normalize(ho);
 #endif
 #ifdef TSPACE_COMPUTE_BITANGENT
-	vec3 fD = cross(fC, fA);
-	fB = dot(fD, fB) < 0.0 ? -fD : fD;
+	vec3 hv = cross(hu, hn);
+	ho = dot(hv, ho) < 0.0 ? -hv : hv;
 #endif
 	n = 2.0 * n - vec3(1.0);
-	return normalize(fA * n.x + fB * n.y + fC * n.z);
+	return normalize(hn * n.x + ho * n.y + hu * n.z);
 }
 
-vec3 Q(vec3 t)
+vec3 dL(vec3 t)
 {
-	vec3 fC = gl_FrontFacing ? G : -G;
-	return normalize(E * t.x + F * t.y + fC * t.z);
+	vec3 hu = gl_FrontFacing ? dC : -dC;
+	return normalize(dA * t.x + dB * t.y + hu * t.z);
 }
 
-vec4 R(vec2 fE, vec4 fF)
+vec4 dM(vec2 hA, vec4 hB)
 {
 #if GL_OES_standard_derivatives
-	vec2 fG = fract(fE);
-	vec2 fH = fwidth(fG);
-	float fI = (fH.x + fH.y) > 0.5 ? -6.0 : 0.0;
-	return texture2D(tExtras, fG * fF.xy + fF.zw, fI);
+	vec2 hC = fract(hA);
+	vec2 hD = fwidth(hC);
+	float hE = (hD.x + hD.y) > 0.5 ? -6.0 : 0.0;
+	return texture2D(tExtras, hC * hB.xy + hB.zw, hE);
 #else
-	return texture2D(tExtras, fract(fE) * fF.xy + fF.zw);
+	return texture2D(tExtras, fract(hA) * hB.xy + hB.zw);
 #endif
 }
 
-vec3 fJ(sampler2D fK, vec2 fL, float fM)
+vec3 hF(sampler2D hG, vec2 hH, float hI)
 {
-	vec3 n = texture2D(fK, fL, fM * 2.5).xyz;
-	return O(n);
+	vec3 n = texture2D(hG, hH, hI * 2.5).xyz;
+	return dJ(n);
 }

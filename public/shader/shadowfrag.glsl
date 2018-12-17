@@ -1,27 +1,29 @@
 precision highp float;
-varying vec2 iH;
+varying vec2 jG;
 #ifdef ALPHA_TEST
-varying mediump vec2 j;
+varying mediump vec2 d;
 uniform sampler2D tAlbedo;
 #endif
-
-vec3 iI(float id)
+vec3 jH(float v)
 {
-	vec4 iJ = vec4(1.0, 255.0, 65025.0, 16581375.0) * id;
-	iJ = fract(iJ);
-	iJ.xyz -= iJ.yzw * (1.0 / 255.0);
-	return iJ.xyz;
+	vec4 jI = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+	jI = fract(jI);
+	jI.xyz -= jI.yzw * (1.0 / 255.0);
+	return jI.xyz;
 }
-
 void main(void)
 {
 #ifdef ALPHA_TEST
-	float k = texture2D(tAlbedo, j).a;
-	if (k < 0.5)
+	float e = texture2D(tAlbedo, d).a;
+	if (e < 0.5)
 	{
 		discard;
 	}
 #endif
-	gl_FragColor.xyz = iI((iH.x / iH.y) * 0.5 + 0.5);
+#ifdef SHADOW_NATIVE_DEPTH
+	gl_FragColor.xyz = vec3(0.0, 0.0, 0.0);
+#else
+	gl_FragColor.xyz = jH((jG.x / jG.y) * 0.5 + 0.5);
+#endif
 	gl_FragColor.w = 0.0;
 }

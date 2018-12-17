@@ -1,26 +1,26 @@
 {
-  "name": "marmoset",
+  "name": "marmoset.view.unpacker",
   "version": "1.0.0",
-  "description": "marmoset mview unpack",
+  "description": "marmoset view unpacker",
   "main": "lib/index.js",
   "scripts": {
     "test": "gulp test"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.oschina.net/bitdewy/marmoset.git"
+    "url": "https://github.com/bitdewy/MarmosetViewUnpacker.git"
   },
   "author": "bitdewy",
-  "license": "UNLICENSED",
+  "license": "LICENSE",
   "dependencies": {
-    "async": "^2.0.0-rc.5",
-    "express": "^4.13.4",
-    "pngjs": "^2.3.1",
-    "pug": "^2.0.0-alpha8"
+    "async": "2.6.1",
+    "express": "4.16.4",
+    "pngjs": "3.3.3",
+    "pug": "2.0.3"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-live-server": "0.0.29",
-    "unit.js": "^2.0.0"
+    "gulp": "4.0.0 ",
+    "gulp-live-server": "0.0.31",
+    "unit.js": "2.0.0"
   }
 }

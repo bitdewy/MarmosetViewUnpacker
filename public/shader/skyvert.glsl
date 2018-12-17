@@ -4,30 +4,24 @@ uniform mat4 uViewProjection;
 attribute vec3 vPosition;
 attribute vec2 vTexCoord;
 #if SKYMODE == 3
-varying vec3 iK;
+varying vec3 jJ;
 #else
-varying vec2 j;
+varying vec2 d;
 #endif
-
-vec4 m(mat4 o, vec3 p)
+vec4 h(mat4 i, vec3 p)
 {
-	return o[0] * p.x + (o[1] * p.y + (o[2] * p.z + o[3]));
+	return i[0] * p.x + (i[1] * p.y + (i[2] * p.z + i[3]));
 }
-
-vec4 ih(mat4 o, vec3 id)
-{
-	return o[0] * id.x + o[1] * id.y + o[2] * id.z;
-}
-
+vec4 u(mat4 i, vec3 v) { return i[0] * v.x + i[1] * v.y + i[2] * v.z; }
 void main(void)
 {
-	vec3 p = m(uInverseSkyMatrix, vPosition).xyz;
-	gl_Position = ih(uViewProjection, p);
+	vec3 p = h(uInverseSkyMatrix, vPosition).xyz;
+	gl_Position = u(uViewProjection, p);
 	gl_Position.z -= (1.0 / 65535.0) * gl_Position.w;
 #if SKYMODE == 3
-	iK = vPosition;
-	iK.xy += 1e-20 * vTexCoord;
+	jJ = vPosition;
+	jJ.xy += 1e-20 * vTexCoord;
 #else
-	j = vTexCoord;
+	d = vTexCoord;
 #endif
 }

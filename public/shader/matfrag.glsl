@@ -1,25 +1,28 @@
-#extension GL_OES_standard_derivatives: enable
+#extension GL_OES_standard_derivatives : enable
 precision mediump float;
-varying highp vec3 D;
-varying mediump vec2 j;
-varying mediump vec3 E;
-varying mediump vec3 F;
-varying mediump vec3 G;
+varying highp vec3 dv;
+varying mediump vec2 d;
+varying mediump vec3 dA;
+varying mediump vec3 dB;
+varying mediump vec3 dC;
 #ifdef VERTEX_COLOR
-varying lowp vec4 H;
+varying lowp vec4 dD;
 #endif
 #ifdef TEXCOORD_SECONDARY
-varying mediump vec2 I;
+varying mediump vec2 dE;
 #endif
 uniform sampler2D tAlbedo;
 uniform sampler2D tReflectivity;
 uniform sampler2D tNormal;
 uniform sampler2D tExtras;
 uniform sampler2D tSkySpecular;
+#ifdef REFRACTION
+uniform sampler2D tRefraction;
+#endif
 uniform vec4 uDiffuseCoefficients[9];
 uniform vec3 uCameraPosition;
-uniform vec3 uFresnel;
 uniform float uAlphaTest;
+uniform vec3 uFresnel;
 uniform float uHorizonOcclude;
 uniform float uHorizonSmoothing;
 #ifdef EMISSIVE
@@ -28,6 +31,14 @@ uniform vec4 uTexRangeEmissive;
 #endif
 #ifdef AMBIENT_OCCLUSION
 uniform vec4 uTexRangeAO;
+#endif
+#ifdef REFRACTION
+uniform float uRefractionIOREntry;
+uniform float uRefractionRayDistance;
+uniform vec3 uRefractionTint;
+uniform float uRefractionAlbedoTint;
+uniform mat4 uRefractionViewProjection;
+uniform vec4 uTexRangeRefraction;
 #endif
 #ifdef LIGHT_COUNT
 uniform vec4 uLightPositions[LIGHT_COUNT];
@@ -42,7 +53,7 @@ uniform vec3 uAnisoTangent;
 uniform float uAnisoIntegral;
 uniform vec4 uTexRangeAniso;
 #endif
-#define saturate(x) clamp(x, 0.0, 1.0)
+#define saturate(x) clamp( x, 0.0, 1.0 )
 #include <matsampling.glsl>
 #include <matlighting.glsl>
 #include <matshadows.glsl>
@@ -52,187 +63,214 @@ uniform vec4 uTexRangeAniso;
 #ifdef TRANSPARENCY_DITHER
 #include <matdither.glsl>
 #endif
-
 void main(void)
 {
-	vec4 J = texture2D(tAlbedo, j);
-	vec3 K = L(J.xyz);
-	float k = J.w;
+	vec4 m = texture2D(tAlbedo, d);
+	vec3 dF = dG(m.xyz);
+	float e = m.w;
 #ifdef VERTEX_COLOR
 	{
-		vec3 M = H.xyz;
-#ifdef VERTEX_COLOR_SRGB
-		M = M * (M * (M * 0.305306011 + vec3(0.682171111)) + vec3(0.012522878));
-#endif
-		K *= M;
-#ifdef VERTEX_COLOR_ALPHA
-		k *= H.w;
-#endif
+		vec3 dH = dD.xyz;
+	#ifdef VERTEX_COLOR_SRGB
+		dH = dH * (dH * (dH * 0.305306011 + vec3(0.682171111)) + vec3(0.012522878));
+	#endif
+		dF *= dH;
+	#ifdef VERTEX_COLOR_ALPHA
+		e *= dD.w;
+	#endif
 	}
 #endif
 #ifdef ALPHA_TEST
-	if (k < uAlphaTest)
+	if (e < uAlphaTest)
 	{
 		discard;
 	}
 #endif
 #ifdef TRANSPARENCY_DITHER
-	k = (k > l(j.x)) ? 1.0 : k;
+	e = (e > f(d.x)) ? 1.0 : e;
 #endif
-	vec3 N = O(texture2D(tNormal, j).xyz);
+	vec3 dI = dJ(texture2D(tNormal, d).xyz);
 #ifdef ANISO
 #ifdef ANISO_NO_DIR_TEX
-	vec3 P = Q(uAnisoTangent);
+	vec3 dK = dL(uAnisoTangent);
 #else
-	J = R(j, uTexRangeAniso);
-	vec3 P = 2.0 * J.xyz - vec3(1.0);
-	P = Q(P);
+	m = dM(d, uTexRangeAniso);
+	vec3 dK = 2.0 * m.xyz - vec3(1.0);
+	dK = dL(dK);
 #endif
-	P = P - N * dot(P, N);
-	P = normalize(P);
-	vec3 S = P * uAnisoStrength;
+	dK = dK - dI * dot(dK, dI);
+	dK = normalize(dK);
+	vec3 dN = dK * uAnisoStrength;
 #endif
-	vec3 T = normalize(uCameraPosition - D);
-	J = texture2D(tReflectivity, j);
-	vec3 U = L(J.xyz);
-	float V = J.w;
-	float W = V;
+	vec3 dO = normalize(uCameraPosition - dv);
+	m = texture2D(tReflectivity, d);
+	vec3 dP = dG(m.xyz);
+	float dQ = m.w;
+	float dR = dQ;
 #ifdef HORIZON_SMOOTHING
-	float X = dot(T, N);
-	X = uHorizonSmoothing - X * uHorizonSmoothing;
-	V = mix(V, 1.0, X * X);
+	float dS = dot(dO, dI);
+	dS = uHorizonSmoothing - dS * uHorizonSmoothing;
+	dQ = mix(dQ, 1.0, dS * dS);
 #endif
 #ifdef STRIPVIEW
-	Y Z;
-	dc(Z, V, U);
+	dT dU;
+	dV(dU, dQ, dP);
 #endif
-	float dd = 1.0;
+	float dW = 1.0;
 #ifdef AMBIENT_OCCLUSION
 #ifdef AMBIENT_OCCLUSION_SECONDARY_UV
-	dd = R(I, uTexRangeAO).x;
+	dW = dM(dE, uTexRangeAO).x;
 #else
-	dd = R(j, uTexRangeAO).x;
+	dW = dM(d, uTexRangeAO).x;
 #endif
-	dd *= dd;
+	dW *= dW;
 #endif
 #if defined(SKIN)
-	de df;
-	dh(df);
-	df.di *= dd;
+	dX dY;
+	dZ(dY);
+	dY.ec *= dW;
 #elif defined(MICROFIBER)
-	dj dk;
-	dl(dk, N);
-	dk.dm *= dd;
+	ed ee;
+	ef(ee, dI);
+	ee.eh *= dW;
 #else
-	vec3 dn = du(N);
-	dn *= dd;
+	vec3 ei = ej(dI);
+	ei *= dW;
 #endif
-	vec3 dv = reflect(-T, N);
+	vec3 ek = reflect(-dO, dI);
 #ifdef ANISO
-	vec3 rt = dv - (0.5 * S * dot(dv, P));
-	vec3 dA = dB(rt, mix(V, 0.5 * V, uAnisoStrength));
+	vec3 rt = ek - (0.5 * dN * dot(ek,dK));
+	vec3 el = em(rt, mix(dQ, 0.5 * dQ, uAnisoStrength));
 #else
-	vec3 dA = dB(dv, V);
+	vec3 el = em(ek, dQ);
 #endif
-	dA *= dC(dv, G);
+	el *= en(ek, dC);
 #ifdef LIGHT_COUNT
-	highp float dD = 10.0 / log2(V * 0.968 + 0.03);
-	dD *= dD;
-	float dE = dD * (1.0 / (8.0 * 3.1415926)) + (4.0 / (8.0 * 3.1415926));
-	dE = min(dE, 1.0e3);
+	highp float eo = 10.0 / log2(dQ * 0.968 + 0.03);
+	eo *= eo;
+	float eu = eo * (1.0 / (8.0 * 3.1415926)) + (4.0 / (8.0 * 3.1415926));
+	eu = min(eu, 1.0e3);
 #ifdef SHADOW_COUNT
-	dF dG;
+	ev eA;
 #ifdef SKIN
 #ifdef SKIN_VERSION_1
-	dH(dG, SHADOW_KERNEL + SHADOW_KERNEL * df.dI);
+	eB(eA, SHADOW_KERNEL + SHADOW_KERNEL * dY.eC);
 #else
-	dJ dK;
-	float dL = SHADOW_KERNEL + SHADOW_KERNEL * df.dI;
-	dM(dK, dL);
-	dH(dG, dL);
+	eD eE;
+	float eF = SHADOW_KERNEL + SHADOW_KERNEL * dY.eC;
+	eG(eE, eF);
+	eB(eA, eF);
 #endif
 #else
-	dH(dG, SHADOW_KERNEL);
+	eB(eA, SHADOW_KERNEL);
 #endif
 #endif
 #ifdef ANISO
-	dE *= uAnisoIntegral;
+	eu *= uAnisoIntegral;
 #endif
-	for (int u = 0; u < LIGHT_COUNT; ++u)
+	for (int k = 0; k < LIGHT_COUNT; ++k)
 	{
-		vec3 dN = uLightPositions[u].xyz - D * uLightPositions[u].w;
-		float dO = inversesqrt(dot(dN, dN));
-		dN *= dO;
-		float a = saturate(uLightParams[u].z / dO);
-		a = 1.0 + a * (uLightParams[u].x + uLightParams[u].y * a);
-		float s = saturate(dot(dN, uLightDirections[u]));
-		s = saturate(uLightSpot[u].y - uLightSpot[u].z * (1.0 - s * s));
-		vec3 dP = (a * s) * uLightColors[u].xyz;
-#if defined(SKIN)
-#ifdef SHADOW_COUNT
-#ifdef SKIN_VERSION_1
-		dQ(df, dG.dR[u], 1.0, dN, N, dP);
-#else
-		dQ(df, dG.dR[u], dK.dK[u], dN, N, dP);
-#endif
-#else
-		dQ(df, 1.0, 0.0, dN, N, dP);
-#endif
-#elif defined(MICROFIBER)
-#ifdef SHADOW_COUNT
-		dS(dk, dG.dR[u], dN, N, dP);
-#else
-		dS(dk, 1.0, dN, N, dP);
-#endif
-#else
-		float dT = saturate((1.0 / 3.1415926) * dot(dN, N));
-#ifdef SHADOW_COUNT
-		dT *= dG.dR[u];
-#endif
-		dn += dT * dP;
-#endif
-		vec3 dU = dN + T;
-#ifdef ANISO
-		dU = dU - (S * dot(dU, P));
-#endif
-		dU = normalize(dU);
-		float dV = dE * pow(saturate(dot(dU, N)), dD);
-#ifdef SHADOW_COUNT
-		dV *= dG.dR[u];
-#endif
-		dA += dV * dP;
+		vec3 eH = uLightPositions[k].xyz - dv * uLightPositions[k].w;
+		float eI = inversesqrt(dot(eH, eH));
+		eH *= eI;
+		float a = saturate(uLightParams[k].z / eI);
+		a = 1.0 + a * (uLightParams[k].x + uLightParams[k].y * a);
+		float s = saturate(dot(eH, uLightDirections[k]));
+		s = saturate(uLightSpot[k].y - uLightSpot[k].z * (1.0 - s * s));
+		vec3 eJ = (a * s) * uLightColors[k].xyz;
+	#if defined(SKIN)
+	#ifdef SHADOW_COUNT
+	#ifdef SKIN_VERSION_1
+		eK(dY, eA.eL[k], 1.0, eH, dI, eJ);
+	#else
+		eK(dY, eA.eL[k], eE.eE[k], eH, dI, eJ);
+	#endif
+	#else
+		eK(dY, 1.0, 0.0, eH, dI, eJ);
+	#endif
+	#elif defined(MICROFIBER)
+	#ifdef SHADOW_COUNT
+		eM(ee, eA.eL[k], eH, dI, eJ);
+	#else
+		eM(ee, 1.0, eH, dI, eJ);
+	#endif
+	#else
+		float eN = saturate((1.0 / 3.1415926) * dot(eH, dI));
+	#ifdef SHADOW_COUNT
+		eN *= eA.eL[k];
+	#endif
+		ei += eN * eJ;
+	#endif
+		vec3 eO = eH + dO;
+	#ifdef ANISO
+		eO = eO - (dN * dot(eO, dK));
+	#endif
+		eO = normalize(eO);
+		float eP = eu * pow(saturate(dot(eO, dI)), eo);
+	#ifdef SHADOW_COUNT
+		eP *= eA.eL[k];
+	#endif
+		el += eP * eJ;
 	}
 #endif
 #if defined(SKIN)
-	vec3 dn, diff_extra;
-	dW(dn, diff_extra, df, T, N, V);
+	vec3 ei, diff_extra;
+	eQ(ei, diff_extra, dY, dO, dI, dQ);
 #elif defined(MICROFIBER)
-	vec3 dn, diff_extra;
-	dX(dn, diff_extra, dk, T, N, V);
+	vec3 ei, diff_extra;
+	eR(ei, diff_extra, ee, dO, dI, dQ);
 #endif
-	dA *= dY(T, N, U, V * V);
+	vec3 eS = eT(dO, dI, dP, dQ * dQ);
+	el *= eS;
+#ifdef REFRACTION
+	vec4 eU;
+	{
+		vec3 G = refract(-dO, dI, uRefractionIOREntry);
+		G = dv + G * uRefractionRayDistance;
+		vec4 eV = uRefractionViewProjection[0] * G.x + (uRefractionViewProjection[1] * G.y + (uRefractionViewProjection[2] * G.z + uRefractionViewProjection[3]));
+		vec2 c = eV.xy / eV.w;
+		c = 0.5 * c + vec2(0.5, 0.5);
+		vec2 i = mod(floor(c), 2.0);
+		c = fract(c);
+		c.x = i.x > 0.0 ? 1.0 - c.x : c.x;
+		c.y = i.y > 0.0 ? 1.0 - c.y : c.y;
+		eU.rgb = texture2D(tRefraction, c).xyz;
+		eU.rgb = mix(eU.rgb, eU.rgb * dF, uRefractionAlbedoTint);
+		eU.rgb = eU.rgb - eU.rgb * eS;
+		eU.rgb *= uRefractionTint;
+	#ifdef REFRACTION_NO_MASK_TEX
+		eU.a = 1.0;
+	#else
+		eU.a = dM(d, uTexRangeRefraction).x;
+	#endif
+	}
+#endif
 #ifdef DIFFUSE_UNLIT
-	gl_FragColor.xyz = K + dA;
+	gl_FragColor.xyz = dF;
 #else
-	gl_FragColor.xyz = dn * K + dA;
+	gl_FragColor.xyz = ei * dF;
 #endif
+#ifdef REFRACTION
+	gl_FragColor.xyz = mix(gl_FragColor.xyz, eU.rgb, eU.a);
+#endif
+	gl_FragColor.xyz += el;
 #if defined(SKIN) || defined(MICROFIBER)
 	gl_FragColor.xyz += diff_extra;
 #endif
 #ifdef EMISSIVE
 #ifdef EMISSIVE_SECONDARY_UV
-	vec2 dZ = I;
+	vec2 eW = dE;
 #else
-	vec2 dZ = j;
+	vec2 eW = d;
 #endif
-	gl_FragColor.xyz += uEmissiveScale * L(R(dZ, uTexRangeEmissive).xyz);
+	gl_FragColor.xyz += uEmissiveScale * dG(dM(eW, uTexRangeEmissive).xyz);
 #endif
 #ifdef STRIPVIEW
-	gl_FragColor.xyz = ec(Z, N, K, U, W, dn, dA, gl_FragColor.xyz);
+	gl_FragColor.xyz = eX(dU, dI, dF, dP, dR, ei, el, gl_FragColor.xyz);
 #endif
 #ifdef NOBLEND
 	gl_FragColor.w = 1.0;
 #else
-	gl_FragColor.w = k;
+	gl_FragColor.w = e;
 #endif
 }

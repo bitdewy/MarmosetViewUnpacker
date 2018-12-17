@@ -1,16 +1,17 @@
 precision highp float;
 uniform mat4 uModelViewProjectionMatrix;
+uniform vec2 uUVOffset;
 attribute vec3 vPosition;
 attribute vec2 vTexCoord;
-varying mediump vec2 j;
+varying mediump vec2 d;
 
-vec4 m(mat4 o, vec3 p)
+vec4 h(mat4 i, vec3 p)
 {
-	return o[0] * p.x + (o[1] * p.y + (o[2] * p.z + o[3]));
+	return i[0] * p.x + (i[1] * p.y + (i[2] * p.z + i[3]));
 }
 
 void main(void)
 {
-	gl_Position = m(uModelViewProjectionMatrix, vPosition.xyz);
-	j = vTexCoord;
+	gl_Position = h(uModelViewProjectionMatrix, vPosition.xyz);
+	d = vTexCoord + uUVOffset;
 }
