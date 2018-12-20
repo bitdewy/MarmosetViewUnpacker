@@ -5742,6 +5742,8 @@ marmoset = {};
     };
     marmoset = "undefined" == typeof marmoset ? {} : marmoset;
     marmoset.WebViewer = WebViewer;
+    marmoset.Archive = Archive;
+    marmoset.Network = Network;
     marmoset.dataLocale = (0 == window.location.protocol.indexOf("https") ? "https:" : "http:") + "//viewer.marmoset.co/main/data/";
     var ShaderTable = {
         "alphaprepassfrag.glsl": "precision mediump float;\n#include <matdither.glsl>\nuniform sampler2D tAlbedo;varying mediump vec2 d;void main(){float e=texture2D(tAlbedo,d).a;if(e<=f(d.x)){discard;}gl_FragColor=vec4(0.0);}",

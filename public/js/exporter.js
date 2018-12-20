@@ -151,9 +151,11 @@ var exporter = {
             content = content.concat(position, texCoord, normal, f);
             return content;
         };
-
-        var data = JSON.parse(String.fromCharCode.apply(null, files['scene.json'].data));
-        var title = data.metaData.title;
+        var asString = function (buffer) {
+            for (var a = "", b = 0; b < buffer.length; ++b) a += String.fromCharCode(buffer[b]);
+            return a;
+        };
+        var data = JSON.parse(asString(files['scene.json'].data));
         var req = new XMLHttpRequest();
         var arr = obj.name.split('/');
         var prefix = arr[arr.length - 1];
