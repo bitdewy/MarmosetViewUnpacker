@@ -12,7 +12,8 @@ gulp
 
 ## Usage
 
-visit http://localhost:8000/ in your browser and click download resource button. Have fun.
+Visit http://localhost:8000/ in your browser and click download resource button. Have fun.
+
 ![](screenshot.png)
 
 ## License
