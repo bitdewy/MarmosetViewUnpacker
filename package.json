@@ -14,13 +14,13 @@
   "license": "LICENSE",
   "dependencies": {
     "async": "2.6.1",
-    "express": "4.16.4",
+    "express": "4.18.2",
     "pngjs": "3.3.3",
     "pug": "2.0.3"
   },
   "devDependencies": {
     "gulp": "4.0.0 ",
     "gulp-live-server": "0.0.31",
-    "unit.js": "2.0.0"
+    "unit.js": "2.1.1"
   }
 }
