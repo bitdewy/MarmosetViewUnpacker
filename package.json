@@ -21,6 +21,6 @@
   "devDependencies": {
     "gulp": "4.0.0 ",
     "gulp-live-server": "0.0.31",
-    "unit.js": "2.0.0"
+    "unit.js": "2.1.1"
   }
 }
